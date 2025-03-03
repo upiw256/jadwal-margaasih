@@ -5,10 +5,10 @@ import Header from "./header";
 import Bottom from "./bottom";
 export default function Layout() {
   return (
-  <>
-    <Header/>
-    <Slot />
-    <Bottom/>
-  </>
-  )
+    <>
+      <Header />
+      <Slot />
+      <Bottom />
+    </>
+  );
 }

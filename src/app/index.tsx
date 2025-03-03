@@ -1,137 +1,50 @@
-import React, { useState, useCallback, useEffect } from "react";
-import {
-  Text,
-  View,
-  Image,
-  ScrollView,
-  RefreshControl,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, Image, ActivityIndicator, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import Hero from "./components/Hero"; // Import the Hero component
+import { fetchArticles } from "./api"; // Import the API call
+import { useRouter } from "expo-router"; // Import the router
 
-const API_URL = "https://sman1margaasih.sch.id/api/article";
-const AUTH_TOKEN = "Sman1margaasih*";
+const items = [
+  { name: "Jadwal Kelas", icon: require("./assets/icon/calendar.png"), url: "/kelas" },
+  { name: "Jadwal Guru", icon: require("./assets/icon/teacher_schedule.png"), url: "/guru" },
+  { name: "About", icon: require("./assets/icon/info.png"), url: "/about" },
+//   { name: "Data Siswa", icon: require("./assets/icon/students.png"), url: "/data-siswa" },
+//   { name: "Data Guru", icon: require("./assets/icon/teachers.png"), url: "/data-guru" },
+//   { name: "Absensi", icon: require("./assets/icon/absen.png"), url: "/absensi" }
+];
 
-export default function Page() {
-  return (
-    <View className="flex flex-1">
-      <Content />
-    </View>
-  );
-}
-
-function Content() {
-  const [refreshing, setRefreshing] = useState(false);
+export default function HomeScreen() {
   const [cardContents, setCardContents] = useState<any[]>([]);
-  const [noMoreData, setNoMoreData] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-
-  const fetchArticles = async () => {
-    try {
-      const response = await fetch(API_URL, {
-        headers: {
-          Authorization: `Bearer ${AUTH_TOKEN}`,
-        },
-      });
-      const data = await response.json();
-      if (!data) {
-        throw new Error("No data returned from API");
-      }
-      if (!Array.isArray(data)) {
-        throw new Error("Expected data to be an array, but got " + typeof data);
-      }
-      setCardContents(data);
-      setNoMoreData(data.length === 0);
-    } catch (error) {
-      console.error("Error fetching articles:", error);
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    fetchArticles();
+    fetchArticles()
+      .then((data) => setCardContents(data))
+      .catch((error) => console.error(error))
+      .finally(() => setLoading(false));
   }, []);
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchArticles().finally(() => setRefreshing(false));
-  }, []);
-
-  const loadMoreContents = () => {
-    if (loadingMore || noMoreData) return;
-    setLoadingMore(true);
-    // Simulate a network request to load more contents
-    setTimeout(() => {
-      // Here you would fetch more data from the API
-      setLoadingMore(false);
-    }, 2000);
-  };
-
-  const handleScroll = ({ nativeEvent }) => {
-    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 20) {
-      loadMoreContents();
-    }
-  };
 
   return (
-    <ScrollView
-      className="flex-1"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      onScroll={handleScroll}
-      scrollEventThrottle={16}
-    >
-      <Text className="text-2xl font-bold text-center mt-4">Artikel</Text>
-      <View className="flex flex-col items-center gap-4 text-center">
-        {cardContents.map((content, index) => (
-          <Card key={index} content={content} />
+    <View className="p-5">
+      <Hero cardContents={cardContents} loading={loading} />
+      <Text className="font-bold text-lg mt-5">Menu</Text>
+      <View className="flex-row flex-wrap justify-start mt-5 gap-1">
+        {items.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={{ alignItems: "center", width: "22%", marginBottom: 10 }}
+            onPress={() => router.push(item.url)}
+          >
+            <View
+              className="p-2 bg-gray-200 mb-2"
+              style={{ height: 50, width: 50, justifyContent: 'center', alignItems: 'center' }}
+            >
+              <Image source={item.icon} style={{ width: 24, height: 24 }} />
+            </View>
+            <Text style={{ fontSize: 10 }}>{item.name}</Text>
+          </TouchableOpacity>
         ))}
-        {loadingMore && <ActivityIndicator size="large" color="#0000ff" />}
-        {noMoreData && <Text>Data sudah habis</Text>}
-      </View>
-    </ScrollView>
-  );
-}
-
-function Card({ content }) {
-  const truncateText = (text: string, maxWords: number) => {
-    const words = text.split(" ");
-    return words.length > maxWords
-      ? words.slice(0, maxWords).join(" ") + "..."
-      : text;
-  };
-
-  const decodeHtmlEntities = (text: string) => {
-    return text
-      .replace(/&#(\d+);/g, (_, dec) => {
-        return String.fromCharCode(dec);
-      })
-      .replace(/<p>&nbsp;<\/p>/g, "");
-  };
-  return (
-    <View className="mt-8 w-full max-w-sm rounded-lg overflow-hidden shadow-lg">
-      <Image
-        source={{
-          uri: "https://sman1margaasih.sch.id/storage/" + content.image,
-        }}
-        style={{ width: "100%", height: 192 }}
-      />
-      <View className="px-6 py-4">
-        <Text className="font-bold text-xl mb-2">{content.title}</Text>
-        <Text className="text-gray-700 text-base">
-          {truncateText(decodeHtmlEntities(content.content), 20)}
-        </Text>
-        <Text className="text-gray-500 text-sm mt-2">
-          By: {content.user.name}
-        </Text>
-        <Text className="text-gray-500 text-sm">
-          Published on:{" "}
-          {new Date(content.created_at).toLocaleDateString("id-ID", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </Text>
       </View>
     </View>
   );
