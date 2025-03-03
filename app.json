@@ -1,15 +1,34 @@
 {
   "expo": {
     "scheme": "acme",
+    "icon": "./src/app/assets/images/icon_square.png",
     "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "orientation": "default",
     "web": {
       "output": "static"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-asset"
     ],
     "name": "margaasih",
-    "slug": "margaasih"
+    "slug": "margaasih",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "30875743-a7bb-41c4-b50f-6b4a9fad62b3"
+      }
+    },
+    "owner": "komo256",
+    "android": {
+      "package": "com.komo256.margaasih",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/app/assets/images/icon_square.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    }
   }
 }

@@ -1,93 +1,136 @@
-import { Link } from "expo-router";
-import React from "react";
-import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  Text,
+  View,
+  Image,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
+
+const API_URL = "https://sman1margaasih.sch.id/api/article";
+const AUTH_TOKEN = "Sman1margaasih*";
 
 export default function Page() {
   return (
     <View className="flex flex-1">
-      <Header />
       <Content />
-      <Footer />
     </View>
   );
 }
 
 function Content() {
-  return (
-    <View className="flex-1">
-      <View className="py-12 md:py-24 lg:py-32 xl:py-48">
-        <View className="px-4 md:px-6">
-          <View className="flex flex-col items-center gap-4 text-center">
-            <Text
-              role="heading"
-              className="text-3xl text-center native:text-5xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl"
-            >
-              Welcome to Project ACME
-            </Text>
-            <Text className="mx-auto max-w-[700px] text-lg text-center text-gray-500 md:text-xl dark:text-gray-400">
-              Discover and collaborate on acme. Explore our services now.
-            </Text>
+  const [refreshing, setRefreshing] = useState(false);
+  const [cardContents, setCardContents] = useState<any[]>([]);
+  const [noMoreData, setNoMoreData] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-            <View className="gap-4">
-              <Link
-                suppressHighlighting
-                className="flex h-9 items-center justify-center overflow-hidden rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 web:shadow ios:shadow transition-colors hover:bg-gray-900/90 active:bg-gray-400/90 web:focus-visible:outline-none web:focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
-                href="/"
-              >
-                Explore
-              </Link>
-            </View>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-}
+  const fetchArticles = async () => {
+    try {
+      const response = await fetch(API_URL, {
+        headers: {
+          Authorization: `Bearer ${AUTH_TOKEN}`,
+        },
+      });
+      const data = await response.json();
+      if (!data) {
+        throw new Error("No data returned from API");
+      }
+      if (!Array.isArray(data)) {
+        throw new Error("Expected data to be an array, but got " + typeof data);
+      }
+      setCardContents(data);
+      setNoMoreData(data.length === 0);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    }
+  };
 
-function Header() {
-  const { top } = useSafeAreaInsets();
-  return (
-    <View style={{ paddingTop: top }}>
-      <View className="px-4 lg:px-6 h-14 flex items-center flex-row justify-between ">
-        <Link className="font-bold flex-1 items-center justify-center" href="/">
-          ACME
-        </Link>
-        <View className="flex flex-row gap-4 sm:gap-6">
-          <Link
-            className="text-md font-medium hover:underline web:underline-offset-4"
-            href="/"
-          >
-            About
-          </Link>
-          <Link
-            className="text-md font-medium hover:underline web:underline-offset-4"
-            href="/"
-          >
-            Product
-          </Link>
-          <Link
-            className="text-md font-medium hover:underline web:underline-offset-4"
-            href="/"
-          >
-            Pricing
-          </Link>
-        </View>
-      </View>
-    </View>
-  );
-}
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
-function Footer() {
-  const { bottom } = useSafeAreaInsets();
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchArticles().finally(() => setRefreshing(false));
+  }, []);
+
+  const loadMoreContents = () => {
+    if (loadingMore || noMoreData) return;
+    setLoadingMore(true);
+    // Simulate a network request to load more contents
+    setTimeout(() => {
+      // Here you would fetch more data from the API
+      setLoadingMore(false);
+    }, 2000);
+  };
+
+  const handleScroll = ({ nativeEvent }) => {
+    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 20) {
+      loadMoreContents();
+    }
+  };
+
   return (
-    <View
-      className="flex shrink-0 bg-gray-100 native:hidden"
-      style={{ paddingBottom: bottom }}
+    <ScrollView
+      className="flex-1"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
     >
-      <View className="py-6 flex-1 items-start px-4 md:px-6 ">
-        <Text className={"text-center text-gray-700"}>
-          © {new Date().getFullYear()} Me
+      <Text className="text-2xl font-bold text-center mt-4">Artikel</Text>
+      <View className="flex flex-col items-center gap-4 text-center">
+        {cardContents.map((content, index) => (
+          <Card key={index} content={content} />
+        ))}
+        {loadingMore && <ActivityIndicator size="large" color="#0000ff" />}
+        {noMoreData && <Text>Data sudah habis</Text>}
+      </View>
+    </ScrollView>
+  );
+}
+
+function Card({ content }) {
+  const truncateText = (text: string, maxWords: number) => {
+    const words = text.split(" ");
+    return words.length > maxWords
+      ? words.slice(0, maxWords).join(" ") + "..."
+      : text;
+  };
+
+  const decodeHtmlEntities = (text: string) => {
+    return text
+      .replace(/&#(\d+);/g, (_, dec) => {
+        return String.fromCharCode(dec);
+      })
+      .replace(/<p>&nbsp;<\/p>/g, "");
+  };
+  return (
+    <View className="mt-8 w-full max-w-sm rounded-lg overflow-hidden shadow-lg">
+      <Image
+        source={{
+          uri: "https://sman1margaasih.sch.id/storage/" + content.image,
+        }}
+        style={{ width: "100%", height: 192 }}
+      />
+      <View className="px-6 py-4">
+        <Text className="font-bold text-xl mb-2">{content.title}</Text>
+        <Text className="text-gray-700 text-base">
+          {truncateText(decodeHtmlEntities(content.content), 20)}
+        </Text>
+        <Text className="text-gray-500 text-sm mt-2">
+          By: {content.user.name}
+        </Text>
+        <Text className="text-gray-500 text-sm">
+          Published on:{" "}
+          {new Date(content.created_at).toLocaleDateString("id-ID", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
         </Text>
       </View>
     </View>
