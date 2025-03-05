@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Image, Dimensions } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { fetchArticles } from "../api"; // Import the correct API function
+import { fetchArticles } from "../../api"; // Import the correct API function
 import { WebView } from 'react-native-webview';
 
 export default function ArtikelDetail() {

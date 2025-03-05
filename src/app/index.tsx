@@ -8,7 +8,7 @@ const items = [
   { name: "Jadwal Kelas", icon: require("./assets/icon/calendar.png"), url: "/kelas" },
   { name: "Jadwal Guru", icon: require("./assets/icon/teacher_schedule.png"), url: "/guru" },
   { name: "About", icon: require("./assets/icon/info.png"), url: "/about" },
-  { name: "Data Siswa", icon: require("./assets/icon/students.png"), url: "/data-siswa" },
+  { name: "Data Siswa", icon: require("./assets/icon/students.png"), url: "/pages/siswa" },
   //   { name: "Data Guru", icon: require("./assets/icon/teachers.png"), url: "/data-guru" },
   //   { name: "Absensi", icon: require("./assets/icon/absen.png"), url: "/absensi" }
 ];

@@ -105,6 +105,27 @@ export const fetchArticles = async () => {
     throw error;
   }
 };
+// buatkan fungsi fetchStudents
+export const fetchStudents = async () => {
+  try {
+    const response = await fetch(`${API_URL}/students`, {  // ganti student dengan endpoint yang benar
+      headers: {
+        Authorization: `Bearer ${AUTH_TOKEN}`,  // ganti AUTH_TOKEN dengan token yang sesuai  
+      },
+    });
+    const data = await response.json();
+    if (!data) {
+      throw new Error("No data returned from API");
+    }
+    if (!Array.isArray(data)) {  
+      throw new Error("Expected data to be an array, but got " + typeof data);
+    }
+    return data; 
+  } catch (error) {
+    console.error("Error fetching students:", error);  
+    throw error;  
+  }
+};
 
 export default {
   fetchTeachers,
@@ -112,4 +133,5 @@ export default {
   fetchClassrooms,
   fetchClassroomSchedule,
   fetchArticles,
+  fetchStudents,  
 };

@@ -11,7 +11,7 @@ export default function Page() {
   return (
     <View className="flex-1 items-center justify-center bg-white p-6">
       <Image
-        source={require("../assets/images/image1.jpg")}
+        source={require("../../assets/images/image1.jpg")}
         placeholder={{ blurhash }}
         contentFit="cover"
         transition={1000}
