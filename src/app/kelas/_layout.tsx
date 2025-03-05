@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import { useWindowDimensions } from "react-native";
+import { fetchClassrooms, fetchClassroomSchedule } from "../api";
 
 interface Classroom {
   id: number;
@@ -48,22 +49,20 @@ export default function Page() {
   const layout = useWindowDimensions();
 
   useEffect(() => {
-    fetch("https://sman1margaasih.sch.id/api/classroom", {
-      headers: {
-        Authorization: "Bearer Sman1margaasih*",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    const fetchClassroomsData = async () => {
+      try {
+        const data = await fetchClassrooms();
         if (data && Array.isArray(data)) {
           setClassrooms(data);
         } else {
           console.error("API response is not valid:", data);
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching classrooms:", error);
-      });
+      }
+    };
+
+    fetchClassroomsData();
   }, []);
 
   const handleSearch = () => {
@@ -77,53 +76,35 @@ export default function Page() {
     setVisibleSchedules({}); // Reset the visible schedules state
   };
 
-  const handleShowId = (classroomId: number) => {
+  const handleShowId = async (classroomId: number) => {
     setVisibleSchedules((prevVisible) => ({
       ...prevVisible,
       [classroomId]: !prevVisible[classroomId],
     }));
 
     if (!visibleSchedules[classroomId]) {
-      fetch(`https://sman1margaasih.sch.id/api/schedules/${classroomId}`, {
-        headers: {
-          Authorization: "Bearer Sman1margaasih*",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data && data.success && Array.isArray(data.data)) {
-            const grouped = groupByDayOfWeek(data.data as Schedule[]);
-            setSchedules((prevSchedules) => ({
-              ...prevSchedules,
-              [classroomId]: grouped,
-            }));
-            setScheduleNotFound((prevNotFound) => ({
-              ...prevNotFound,
-              [classroomId]: false,
-            }));
-          } else {
-            console.error("API response is not valid:", data);
-            setSchedules((prevSchedules) => ({
-              ...prevSchedules,
-              [classroomId]: {},
-            }));
-            setScheduleNotFound((prevNotFound) => ({
-              ...prevNotFound,
-              [classroomId]: true,
-            }));
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching schedule:", error);
-          setSchedules((prevSchedules) => ({
-            ...prevSchedules,
-            [classroomId]: {},
-          }));
-          setScheduleNotFound((prevNotFound) => ({
-            ...prevNotFound,
-            [classroomId]: true,
-          }));
-        });
+      try {
+        const data = await fetchClassroomSchedule(classroomId);
+        const grouped = groupByDayOfWeek(data as Schedule[]);
+        setSchedules((prevSchedules) => ({
+          ...prevSchedules,
+          [classroomId]: grouped,
+        }));
+        setScheduleNotFound((prevNotFound) => ({
+          ...prevNotFound,
+          [classroomId]: false,
+        }));
+      } catch (error) {
+        console.error("Error fetching schedule:", error);
+        setSchedules((prevSchedules) => ({
+          ...prevSchedules,
+          [classroomId]: {},
+        }));
+        setScheduleNotFound((prevNotFound) => ({
+          ...prevNotFound,
+          [classroomId]: true,
+        }));
+      }
     }
   };
 

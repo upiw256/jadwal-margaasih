@@ -1,26 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Image, Dimensions } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { fetchArticles } from "../api"; // Import the API call
+import { useLocalSearchParams } from "expo-router";
+import { fetchArticles } from "../api"; // Import the correct API function
 import { WebView } from 'react-native-webview';
 
 export default function ArtikelDetail() {
-  const router = useRouter();
   const { id } = useLocalSearchParams();
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const { width } = Dimensions.get('window');
 
   useEffect(() => {
-    if (id) {
-      fetchArticles()
-        .then(data => {
-          const article = data.find(item => item.id.toString() === id.toString());
+    const fetchArticleData = async () => {
+      if (id) {
+        try {
+          const data = await fetchArticles();
+          const article = data.find((item: any) => item.id.toString() === id.toString());
           setContent(article);
-        })
-        .catch(error => console.error(error))
-        .finally(() => setLoading(false));
-    }
+        } catch (error) {
+          console.error("Error fetching article:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchArticleData();
   }, [id]);
 
   if (loading) {

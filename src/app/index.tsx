@@ -1,16 +1,16 @@
-import { View, Text, Image, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
 import Hero from "./components/Hero"; // Import the Hero component
-import { fetchArticles } from "./api"; // Import the API call
+import fetchArticles from "./api"; // Import the API call
 import { useRouter } from "expo-router"; // Import the router
 
 const items = [
   { name: "Jadwal Kelas", icon: require("./assets/icon/calendar.png"), url: "/kelas" },
   { name: "Jadwal Guru", icon: require("./assets/icon/teacher_schedule.png"), url: "/guru" },
   { name: "About", icon: require("./assets/icon/info.png"), url: "/about" },
-//   { name: "Data Siswa", icon: require("./assets/icon/students.png"), url: "/data-siswa" },
-//   { name: "Data Guru", icon: require("./assets/icon/teachers.png"), url: "/data-guru" },
-//   { name: "Absensi", icon: require("./assets/icon/absen.png"), url: "/absensi" }
+  { name: "Data Siswa", icon: require("./assets/icon/students.png"), url: "/data-siswa" },
+  //   { name: "Data Guru", icon: require("./assets/icon/teachers.png"), url: "/data-guru" },
+  //   { name: "Absensi", icon: require("./assets/icon/absen.png"), url: "/absensi" }
 ];
 
 export default function HomeScreen() {
@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    fetchArticles()
+    fetchArticles.fetchArticles()
       .then((data) => setCardContents(data))
       .catch((error) => console.error(error))
       .finally(() => setLoading(false));
@@ -27,7 +27,9 @@ export default function HomeScreen() {
 
   return (
     <View className="p-5">
-      <Hero cardContents={cardContents} loading={loading} />
+      {cardContents.length > 0 && (
+        <Hero cardContents={cardContents} loading={loading} />
+      )}
       <Text className="font-bold text-lg mt-5">Menu</Text>
       <View className="flex-row flex-wrap justify-start mt-5 gap-1">
         {items.map((item, index) => (

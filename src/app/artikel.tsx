@@ -9,6 +9,12 @@ import {
 import Card from "./components/Card"; // Import the Card component
 import { fetchArticles } from "./api"; // Import the API call
 
+interface Article {
+  id: number;
+  title: string;
+  content: string;
+}
+
 export default function Page() {
   return (
     <View className="flex flex-1">
