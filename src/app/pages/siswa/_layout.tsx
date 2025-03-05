@@ -13,8 +13,8 @@ export default function Page() {
     const fetchStudentsData = async () => {
       try {
         const data = await fetchStudents();
-        setStudents(data);
-        setFilteredStudents(data); // Menyaring data siswa awal
+        setStudents(data); // Menyimpan data siswa lengkap
+        setFilteredStudents([]); // Set filteredStudents kosong saat pertama kali
         setLoading(false); // Menandakan bahwa data sudah selesai diambil
       } catch (error) {
         console.error(error);
@@ -26,10 +26,14 @@ export default function Page() {
 
   // Fungsi untuk memfilter siswa berdasarkan nama
   const handleSearch = () => {
-    const filtered = students.filter(student =>
-      student.nama.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredStudents(filtered);
+    if (searchQuery === '') {
+      setFilteredStudents([]); // Reset filteredStudents jika pencarian kosong
+    } else {
+      const filtered = students.filter(student =>
+        student.nama.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredStudents(filtered); // Menampilkan hasil pencarian
+    }
   };
 
   return (
@@ -40,13 +44,13 @@ export default function Page() {
       <TextInput
         className="border border-gray-300 p-2 mb-4"
         value={searchQuery}
-        onChangeText={setSearchQuery} // Menggunakan onChangeText untuk update searchQuery
+        onChangeText={setSearchQuery} // Update searchQuery saat input berubah
         placeholder="Cari siswa berdasarkan nama"
       />
       
       {/* Tombol Cari Menggunakan TouchableOpacity */}
       <TouchableOpacity
-        onPress={handleSearch}
+        onPress={handleSearch} // Pencarian hanya terjadi saat tombol ditekan
         className="bg-blue-500 py-2 px-4 rounded-md mb-4"
       >
         <Text className="text-white text-center font-semibold">Cari</Text>
@@ -57,15 +61,20 @@ export default function Page() {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <ScrollView className="mt-4">
-          {filteredStudents.map((student) => (
-            <View key={student.id} className="mb-2">
-              <Text className="text-lg font-bold">{student.nama}</Text>
-              <Text className="text-gray-600">Kelas: {student.nama_rombel}</Text>
-              <Text className="text-gray-600">Jenis Kelamin: {student.jenis_kelamin}</Text>
-              <Text className="text-gray-600">Tempat Lahir: {student.tempat_lahir}</Text>
-              <Text className="text-gray-600">Tanggal Lahir: {student.tanggal_lahir}</Text>
-            </View>
-          ))}
+          {/* Menampilkan pesan jika data tidak ditemukan */}
+          {filteredStudents.length === 0 ? (
+            <Text className="text-center text-red-500 font-semibold">Data tidak ada</Text>
+          ) : (
+            filteredStudents.map((student) => (
+              <View key={student.id} className="mb-2">
+                <Text className="text-lg font-bold">{student.nama}</Text>
+                <Text className="text-gray-600">Kelas: {student.nama_rombel}</Text>
+                <Text className="text-gray-600">Jenis Kelamin: {student.jenis_kelamin}</Text>
+                <Text className="text-gray-600">Tempat Lahir: {student.tempat_lahir}</Text>
+                <Text className="text-gray-600">Tanggal Lahir: {student.tanggal_lahir}</Text>
+              </View>
+            ))
+          )}
         </ScrollView>
       )}
     </View>
