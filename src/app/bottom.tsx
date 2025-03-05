@@ -7,7 +7,7 @@ const Bottom = () => {
   const { bottom } = useSafeAreaInsets();
   return (
     <View
-      className="flex shrink-0 bg-cyan-700"
+      className="flex shrink-0 bg-cyan-700 mt-10"
       style={{
         paddingBottom: bottom,
         position: "absolute",
