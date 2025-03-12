@@ -18,7 +18,7 @@ export default function Page() {
         setLoading(false); // Menandakan bahwa data sudah selesai diambil
       } catch (error) {
         console.error(error);
-        setLoading(false); // Jika error, tetap set loading false
+        setLoading(false);
       }
     };
     fetchStudentsData();
