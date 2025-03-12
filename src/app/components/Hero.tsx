@@ -25,17 +25,19 @@ export default function Hero({ cardContents, loading }) {
       horizontal
       pagingEnabled
       showsHorizontalScrollIndicator={false}
+      style={{ width: '100%' }}
+      className="w-full"
     >
-      <View className="flex-row">
-        {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : (
-          cardContents.map((content, index) => (
-            <View key={index} style={{ width }}>
-              <Card content={content} />
-            </View>
-          ))
-        )}
+      <View style={{ flexDirection: 'row', width: '100%' }} className="flex-row w-full">
+      {loading ? (
+      <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+      cardContents.map((content, index) => (
+      <View key={index} style={{ width }} className="w-full">
+        <Card content={content} />
+      </View>
+      ))
+      )}
       </View>
     </ScrollView>
   );
