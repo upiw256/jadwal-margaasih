@@ -72,6 +72,7 @@ export default function Page() {
       {loading && (
         <ActivityIndicator size="large" color="#0e7490" style={styles.loading} />
       )}
+      <slot />
     </View>
   );
 }
