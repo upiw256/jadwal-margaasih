@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View, Button, Alert } from 'react-native';
-import React from "react";
+import { StyleSheet, Text, View, Button, Alert, TextInput } from 'react-native';
+import React, { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function StudentDetail() {
   const { student } = useLocalSearchParams();
   const studentData = JSON.parse(Array.isArray(student) ? student[0] : student);
   const router = useRouter();
+  const [keterangan, setKeterangan] = useState("");
 
   const handleAttendance = async () => {
     const date = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
@@ -13,6 +14,7 @@ export default function StudentDetail() {
       student_id: studentData.id,
       date: date,
       present: true,
+      keterangan: keterangan,
     };
 
     console.log("Request body:", body); // Log the request body
@@ -28,7 +30,7 @@ export default function StudentDetail() {
       });
 
       if (response.ok) {
-        Alert.alert("Success", studentData.nama+" Berhasil Absen", [
+        Alert.alert("Success", studentData.nama + " Berhasil Absen", [
           { text: "OK", onPress: () => router.push("/pages/absen") }
         ]);
       } else {
@@ -53,6 +55,13 @@ export default function StudentDetail() {
         <Text style={styles.studentText}>Birth Date: {studentData.tanggal_lahir}</Text>
         <Text style={styles.studentText}>Phone: {studentData.nomor_telepon_seluler}</Text>
       </View>
+      <Text>Keterangan</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Keterangan"
+        value={keterangan}
+        onChangeText={setKeterangan}
+      />
       <Button title="Absensi Hadir" onPress={handleAttendance} color="#0e7490" />
     </View>
   );
@@ -81,5 +90,14 @@ const styles = StyleSheet.create({
   studentText: {
     fontSize: 16,
     marginBottom: 10,
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    width: "100%",
   },
 });
