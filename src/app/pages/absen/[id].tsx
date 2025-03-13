@@ -28,7 +28,7 @@ export default function StudentDetail() {
       });
 
       if (response.ok) {
-        Alert.alert("Success", studentData.nama, [
+        Alert.alert("Success", studentData.nama+" Berhasil Absen", [
           { text: "OK", onPress: () => router.push("/pages/absen") }
         ]);
       } else {
@@ -53,7 +53,7 @@ export default function StudentDetail() {
         <Text style={styles.studentText}>Birth Date: {studentData.tanggal_lahir}</Text>
         <Text style={styles.studentText}>Phone: {studentData.nomor_telepon_seluler}</Text>
       </View>
-      <Button title="Mark Attendance" onPress={handleAttendance} color="#0e7490" />
+      <Button title="Absensi Hadir" onPress={handleAttendance} color="#0e7490" />
     </View>
   );
 }
