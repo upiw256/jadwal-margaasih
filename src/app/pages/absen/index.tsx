@@ -9,6 +9,7 @@ export default function Page() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [cameraActive, setCameraActive] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -20,12 +21,13 @@ export default function Page() {
   const handleBarCodeScanned = async ({ data }) => {
     setScanned(true);
     setLoading(true);
+    setCameraActive(false); // Close the camera
     try {
       const students = await fetchStudents();
       const student = students.find(student => student.peserta_didik_id === data);
       if (student) {
         router.push({
-          pathname: `/pages/absen/${student.peserta_didik_id}`,
+          pathname: `/pages/absen/[id]`,
           params: { student: JSON.stringify(student) }
         });
       } else {
@@ -48,31 +50,35 @@ export default function Page() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.cameraContainer}>
-        <CameraView
-          facing="back"
-          barcodeScannerSettings={{
-            barcodeTypes: ['qr'],
-          }}
-          onBarcodeScanned={scanned ? undefined : ({ data }) => {
-            console.log(data); // here you can get your barcode id or url
-            handleBarCodeScanned({ data });
-          }}
-          style={styles.camera}
-        />
-        <View style={styles.frame} />
-      </View>
+      {cameraActive && (
+        <View style={styles.cameraContainer}>
+          <CameraView
+            facing="back"
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr'],
+            }}
+            onBarcodeScanned={scanned ? undefined : ({ data }) => {
+              console.log(data); // here you can get your barcode id or url
+              handleBarCodeScanned({ data });
+            }}
+            style={styles.camera}
+          />
+          <View style={styles.frame} />
+        </View>
+      )}
       {scanned && (
         <Button
           title="Tap to Scan Again"
-          onPress={() => setScanned(false)}
+          onPress={() => {
+            setScanned(false);
+            setCameraActive(true); // Reopen the camera
+          }}
           color="#0e7490" // bg-cyan-700
         />
       )}
       {loading && (
         <ActivityIndicator size="large" color="#0e7490" style={styles.loading} />
       )}
-      <slot />
     </View>
   );
 }
