@@ -1,10 +1,46 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button, Alert } from 'react-native';
 import React from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function StudentDetail() {
   const { student } = useLocalSearchParams();
   const studentData = JSON.parse(Array.isArray(student) ? student[0] : student);
+  const router = useRouter();
+
+  const handleAttendance = async () => {
+    const date = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+    const body = {
+      student_id: studentData.id,
+      date: date,
+      present: true,
+    };
+
+    console.log("Request body:", body); // Log the request body
+
+    try {
+      const response = await fetch("https://sman1margaasih.sch.id/api/attendance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer Sman1margaasih*`, // Replace with the actual token
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        Alert.alert("Success", studentData.nama, [
+          { text: "OK", onPress: () => router.push("/pages/absen") }
+        ]);
+      } else {
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
+        Alert.alert("Error", "Failed to mark attendance");
+      }
+    } catch (error) {
+      console.error("Error marking attendance:", error);
+      Alert.alert("Error", "Failed to mark attendance");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -17,6 +53,7 @@ export default function StudentDetail() {
         <Text style={styles.studentText}>Birth Date: {studentData.tanggal_lahir}</Text>
         <Text style={styles.studentText}>Phone: {studentData.nomor_telepon_seluler}</Text>
       </View>
+      <Button title="Mark Attendance" onPress={handleAttendance} color="#0e7490" />
     </View>
   );
 }
@@ -39,6 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     borderRadius: 10,
     width: "100%",
+    marginBottom: 20,
   },
   studentText: {
     fontSize: 16,
