@@ -1,3 +1,4 @@
+import React from "react"; // Add this line
 import { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import { useWindowDimensions } from "react-native";
