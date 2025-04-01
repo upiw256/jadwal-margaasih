@@ -17,7 +17,7 @@ export const fetchTeachers = async () => {
     }
     return data.data;
   } catch (error) {
-    console.error("Error fetching teachers:", error);
+    //console.error("Error fetching teachers:", error);
     throw error;
   }
 };

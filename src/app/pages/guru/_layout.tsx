@@ -59,7 +59,7 @@ export default function Page() {
           console.error("API response is not valid:", data);
         }
       } catch (error) {
-        console.error("Error fetching teachers:", error);
+        //console.error("Error data: kosong", error);
       }
     };
 
@@ -96,7 +96,7 @@ export default function Page() {
           [teacherId]: false,
         }));
       } catch (error) {
-        console.error("Error fetching schedule:", error);
+        console.error("Error fetching schedule: ", error);
         setSchedules((prevSchedules) => ({
           ...prevSchedules,
           [teacherId]: {},
@@ -136,6 +136,12 @@ export default function Page() {
             disabled={!search.trim()}
           />
         </View>
+        {!searchPressed && teachers.length === 0 && (
+          <Text className="mt-4 text-gray-500">Data guru belum tersedia</Text>
+        )}
+        {searchPressed && filteredTeachers.length === 0 && (
+          <Text className="mt-4 text-gray-500">Guru belum memiliki jadwal</Text>
+        )}
         {searchPressed &&
           filteredTeachers.length > 0 &&
           filteredTeachers.map((teacher) => (
