@@ -6,13 +6,14 @@
         "./src/*"
       ]
     },
-    "jsx": "react", // Add this line to enable JSX support
-    "esModuleInterop": true // Add this line to enable ES module interop
+    "jsx": "react",
+    "esModuleInterop": true
   },
   "include": [
     "global.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "nativewind-env.d.ts"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }
