@@ -1,49 +1,34 @@
 import { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, ScrollView } from "react-native";
+import { View, Text, Button, ScrollView } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { useWindowDimensions } from "react-native";
 import { fetchClassrooms, fetchClassroomSchedule } from "../../api";
 
-interface Classroom {
+type Classroom = {
   id: number;
   nama: string;
-  ptk_id_str: string;
-}
+};
 
-interface Schedule {
+type Schedule = {
   day_of_week: string;
-  class_name: string;
-  teacher_name: string;
   subject_name: string;
+  teacher_name: string;
   start_time: string;
   end_time: string;
-}
+};
 
-interface GroupedSchedule {
+type GroupedSchedule = {
   [key: string]: Schedule[];
-}
-
-const dayNames: { [key: string]: string } = {
-  monday: "Senin",
-  tuesday: "Selasa",
-  wednesday: "Rabu",
-  thursday: "Kamis",
-  friday: "Jumat",
-  saturday: "Sabtu",
-  sunday: "Minggu",
 };
 
 export default function Page() {
-  const [search, setSearch] = useState("");
+  const [selectedClassroom, setSelectedClassroom] = useState<number | null>(null);
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-  const [filteredClassrooms, setFilteredClassrooms] = useState<Classroom[]>([]);
   const [searchPressed, setSearchPressed] = useState(false);
   const [schedules, setSchedules] = useState<{
     [key: number]: GroupedSchedule;
   }>({});
   const [scheduleNotFound, setScheduleNotFound] = useState<{
-    [key: number]: boolean;
-  }>({});
-  const [visibleSchedules, setVisibleSchedules] = useState<{
     [key: number]: boolean;
   }>({});
   const layout = useWindowDimensions();
@@ -54,58 +39,78 @@ export default function Page() {
         const data = await fetchClassrooms();
         if (data && Array.isArray(data)) {
           setClassrooms(data);
-        } else {
-          console.error("API response is not valid:", data);
         }
-      } catch (error) {
-        console.error("Error fetching classrooms:", error);
-      }
+      } catch (error) {}
     };
 
     fetchClassroomsData();
   }, []);
 
-  const handleSearch = () => {
-    const filtered = classrooms.filter((classroom) =>
-      classroom.nama.toLowerCase().includes(search.toLowerCase())
-    );
-    setFilteredClassrooms(filtered);
-    setSearchPressed(true);
-    setSchedules({}); // Clear the schedules data
-    setScheduleNotFound({}); // Reset the schedule not found state
-    setVisibleSchedules({}); // Reset the visible schedules state
-  };
+  const handleSearch = async () => {
+    if (selectedClassroom !== null) {
+      setSearchPressed(true);
+      setSchedules({});
+      setScheduleNotFound({});
 
-  const handleShowId = async (classroomId: number) => {
-    setVisibleSchedules((prevVisible) => ({
-      ...prevVisible,
-      [classroomId]: !prevVisible[classroomId],
-    }));
-
-    if (!visibleSchedules[classroomId]) {
       try {
-        const data = await fetchClassroomSchedule(classroomId);
+        const data = await fetchClassroomSchedule(selectedClassroom);
+
+        if (data.success === false) {
+          setScheduleNotFound((prevNotFound) => ({
+            ...prevNotFound,
+            [selectedClassroom]: true,
+          }));
+          return;
+        }
+
+        if (!Array.isArray(data)) {
+          setScheduleNotFound((prevNotFound) => ({
+            ...prevNotFound,
+            [selectedClassroom]: true,
+          }));
+          return;
+        }
+
         const grouped = groupByDayOfWeek(data as Schedule[]);
         setSchedules((prevSchedules) => ({
           ...prevSchedules,
-          [classroomId]: grouped,
+          [selectedClassroom]: grouped,
         }));
         setScheduleNotFound((prevNotFound) => ({
           ...prevNotFound,
-          [classroomId]: false,
+          [selectedClassroom]: false,
         }));
       } catch (error) {
-        console.error("Error fetching schedule:", error);
         setSchedules((prevSchedules) => ({
           ...prevSchedules,
-          [classroomId]: {},
+          [selectedClassroom]: {},
         }));
         setScheduleNotFound((prevNotFound) => ({
           ...prevNotFound,
-          [classroomId]: true,
+          [selectedClassroom]: true,
         }));
       }
     }
+  };
+
+  const dayNames: { [key: number]: string } = {
+    1: "Senin",
+    2: "Selasa",
+    3: "Rabu",
+    4: "Kamis",
+    5: "Jumat",
+    6: "Sabtu",
+    7: "Minggu",
+  };
+
+  const dayMapping: { [key: string]: number } = {
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sunday: 7,
   };
 
   const groupByDayOfWeek = (schedule: Schedule[]): GroupedSchedule => {
@@ -123,68 +128,69 @@ export default function Page() {
       <View className="flex-1 justify-center items-center p-4 mt-4">
         <Text className="text-lg font-bold">Pencarian jadwal kelas</Text>
         <View className="flex-row items-center mt-4 w-full">
-          <TextInput
-            className="border border-gray-300 rounded p-2 flex-1"
-            placeholder="pencariaan berdasarkan nama kelas..."
-            value={search}
-            onChangeText={setSearch}
-          />
+          <Picker
+            selectedValue={selectedClassroom}
+            onValueChange={(itemValue) => setSelectedClassroom(itemValue)}
+            style={{ flex: 1, borderWidth: 1, borderColor: "gray", borderRadius: 4 }}
+          >
+            <Picker.Item label="Pilih kelas..." value={null} />
+            {classrooms.map((classroom) => (
+              <Picker.Item
+                key={classroom.id}
+                label={classroom.nama}
+                value={classroom.id}
+              />
+            ))}
+          </Picker>
           <Button
             title="Search"
             onPress={handleSearch}
-            disabled={!search.trim()}
+            disabled={selectedClassroom === null}
           />
         </View>
-        {searchPressed &&
-          filteredClassrooms.length > 0 &&
-          filteredClassrooms.map((classroom) => (
-            <View
-              key={classroom.id}
-              className="mt-4 p-2 border-b border-gray-200 w-full card"
-            >
-              <Text className="text-base">{classroom.nama}</Text>
-              <Text className="text-sm text-gray-500">
-                Walikelas: {classroom.ptk_id_str}
-              </Text>
-              <Button
-                title="jadwal"
-                onPress={() => handleShowId(classroom.id)}
-              />
-              {visibleSchedules[classroom.id] &&
-                schedules[classroom.id] &&
-                Object.keys(schedules[classroom.id]).length > 0 && (
-                  <View className="mt-4 w-full">
-                    {Object.entries(schedules[classroom.id]).map(
-                      ([day, items]) => (
-                        <View key={day} className="mb-4">
-                          <Text className="font-bold text-lg mb-2">
-                            {dayNames[day] || day}
-                          </Text>
-                          {items.map((item, index) => (
-                            <View
-                              key={index}
-                              className="mb-2 p-2 border border-gray-300 rounded"
-                            >
-                              <Text className="text-base font-semibold">
-                                {item.subject_name}
-                              </Text>
-                              <Text className="text-sm text-gray-600">
-                                {item.teacher_name}
-                              </Text>
-                              <Text className="text-sm text-gray-600">{`${item.start_time} - ${item.end_time}`}</Text>
-                            </View>
-                          ))}
-                        </View>
-                      )
-                    )}
-                  </View>
-                )}
-              {visibleSchedules[classroom.id] &&
-                scheduleNotFound[classroom.id] && (
-                  <Text className="mt-4 text-red-500">Jadwal belum ada</Text>
-                )}
-            </View>
-          ))}
+        {searchPressed && selectedClassroom !== null && schedules[selectedClassroom] && (
+          <View
+            key={selectedClassroom}
+            className="mt-4 p-2 border-b border-gray-200 w-full card"
+          >
+            {Object.keys(schedules[selectedClassroom]).length > 0 ? (
+              <View className="mt-4 w-full">
+                {Object.entries(schedules[selectedClassroom])
+                  .sort(([dayA], [dayB]) => {
+                    const dayNumberA = dayMapping[dayA.toLowerCase()] || 0;
+                    const dayNumberB = dayMapping[dayB.toLowerCase()] || 0;
+                    return dayNumberA - dayNumberB;
+                  })
+                  .map(([day, items]) => {
+                    const dayNumber = dayMapping[day.toLowerCase()] || 0;
+                    return (
+                      <View key={day} className="mb-4">
+                        <Text className="font-bold text-lg mb-2">
+                          {dayNames[dayNumber] || `Unknown Day (${day})`}
+                        </Text>
+                        {items.map((item, index) => (
+                          <View
+                            key={index}
+                            className="mb-2 p-2 border border-gray-300 rounded"
+                          >
+                            <Text className="text-base font-semibold">
+                              {item.subject_name}
+                            </Text>
+                            <Text className="text-sm text-gray-600">
+                              {item.teacher_name}
+                            </Text>
+                            <Text className="text-sm text-gray-600">{`${item.start_time} - ${item.end_time}`}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    );
+                  })}
+              </View>
+            ) : (
+              <Text className="mt-4 text-red-500">Jadwal belum ada</Text>
+            )}
+          </View>
+        )}
       </View>
     </ScrollView>
   );
