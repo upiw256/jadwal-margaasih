@@ -57,10 +57,10 @@ export default function Page() {
         if (data && Array.isArray(data)) {
           setTeachers(data);
         } else {
-          console.error("API response is not valid:", data);
+          console.error("Error: API response for teachers is not valid:", data);
         }
       } catch (error) {
-        //console.error("Error data: kosong", error);
+        console.error("Error fetching teachers data:", error);
       }
     };
 
@@ -87,17 +87,35 @@ export default function Page() {
     if (!visibleSchedules[teacherId]) {
       try {
         const data = await fetchTeacherSchedule(teacherId);
-        const grouped = groupByDayOfWeek(data as Schedule[]);
-        setSchedules((prevSchedules) => ({
-          ...prevSchedules,
-          [teacherId]: grouped,
-        }));
-        setScheduleNotFound((prevNotFound) => ({
-          ...prevNotFound,
-          [teacherId]: false,
-        }));
+        if (Array.isArray(data)) {
+          const grouped = groupByDayOfWeek(data as Schedule[]);
+          setSchedules((prevSchedules) => ({
+            ...prevSchedules,
+            [teacherId]: grouped,
+          }));
+          setScheduleNotFound((prevNotFound) => ({
+            ...prevNotFound,
+            [teacherId]: false,
+          }));
+        } else {
+          console.error(
+            `Error: Expected schedule data for teacher ID ${teacherId} to be an array, but got:`,
+            data
+          );
+          setSchedules((prevSchedules) => ({
+            ...prevSchedules,
+            [teacherId]: {},
+          }));
+          setScheduleNotFound((prevNotFound) => ({
+            ...prevNotFound,
+            [teacherId]: true,
+          }));
+        }
       } catch (error) {
-        console.error("Error fetching schedule: ", error);
+        console.error(
+          `Error fetching schedule for teacher ID ${teacherId}:`,
+          error
+        );
         setSchedules((prevSchedules) => ({
           ...prevSchedules,
           [teacherId]: {},

@@ -25,7 +25,7 @@ export const fetchTeachers = async () => {
 
 export const fetchTeacherSchedule = async (teacherId: number) => {
   try {
-    const response = await fetch(`${API_URL}/teachers/${teacherId}`, {
+    const response = await fetch(`${API_URL}/teacher/${teacherId}`, {
       headers: {
         Authorization: `Bearer ${AUTH_TOKEN}`,
       },
