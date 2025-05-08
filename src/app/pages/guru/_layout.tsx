@@ -86,7 +86,8 @@ export default function Page() {
 
     if (!visibleSchedules[teacherId]) {
       try {
-        const data = await fetchTeacherSchedule(teacherId);
+        const response = await fetchTeacherSchedule(teacherId);
+        const data = response; // Extract the `data` key from the response
         if (Array.isArray(data)) {
           const grouped = groupByDayOfWeek(data as Schedule[]);
           setSchedules((prevSchedules) => ({
@@ -100,7 +101,7 @@ export default function Page() {
         } else {
           console.error(
             `Error: Expected schedule data for teacher ID ${teacherId} to be an array, but got:`,
-            data
+            response
           );
           setSchedules((prevSchedules) => ({
             ...prevSchedules,
@@ -134,6 +135,9 @@ export default function Page() {
         acc[item.day_of_week] = [];
       }
       acc[item.day_of_week].push(item);
+      acc[item.day_of_week].sort((a, b) =>
+        a.start_time.localeCompare(b.start_time)
+      ); // Sort by start_time
       return acc;
     }, {} as GroupedSchedule);
   };

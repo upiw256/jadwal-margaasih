@@ -5,12 +5,31 @@ import fetchArticles from "./api"; // Import the API call
 import { useRouter } from "expo-router"; // Import the router
 
 const items = [
-  { name: "Jadwal Kelas", icon: require("./assets/icon/calendar.png"), url: "/pages/kelas" },
-  { name: "Jadwal Guru", icon: require("./assets/icon/teacher_schedule.png"), url: "/pages/guru" },
-  { name: "About", icon: require("./assets/icon/info.png"), url: "/pages/about" },
-  { name: "Data Siswa", icon: require("./assets/icon/students.png"), url: "/pages/siswa" },
-    { name: "Absensi", icon: require("./assets/icon/teachers.png"), url: "/pages/absen" },
-  //   { name: "Absensi", icon: require("./assets/icon/absen.png"), url: "/absensi" }
+  {
+    name: "Jadwal Kelas",
+    icon: require("./assets/icon/calendar.png"),
+    url: "/pages/kelas",
+  },
+  {
+    name: "Jadwal Guru",
+    icon: require("./assets/icon/teacher_schedule.png"),
+    url: "/pages/guru",
+  },
+  {
+    name: "About",
+    icon: require("./assets/icon/info.png"),
+    url: "/pages/about",
+  },
+  {
+    name: "Data Siswa",
+    icon: require("./assets/icon/students.png"),
+    url: "/pages/siswa",
+  },
+  {
+    name: "Absensi",
+    icon: require("./assets/icon/teachers.png"),
+    url: "/pages/absen",
+  },
 ];
 
 export default function HomeScreen() {
@@ -19,7 +38,8 @@ export default function HomeScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    fetchArticles.fetchArticles()
+    fetchArticles
+      .fetchArticles()
       .then((data) => setCardContents(data))
       .catch((error) => console.error(error))
       .finally(() => setLoading(false));
@@ -40,7 +60,12 @@ export default function HomeScreen() {
           >
             <View
               className="p-2 bg-gray-200 mb-2"
-              style={{ height: 50, width: 50, justifyContent: 'center', alignItems: 'center' }}
+              style={{
+                height: 50,
+                width: 50,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
               <Image source={item.icon} style={{ width: 24, height: 24 }} />
             </View>
