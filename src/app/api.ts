@@ -7,6 +7,7 @@ export const fetchTeachers = async () => {
       headers: {
         Authorization: `Bearer ${AUTH_TOKEN}`,
       },
+      mode: "no-cors",
     });
     const data = await response.json();
     if (!data) {
