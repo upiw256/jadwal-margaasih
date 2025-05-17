@@ -139,7 +139,11 @@ export default function Page() {
               borderWidth: 1,
               borderColor: "gray",
               borderRadius: 4,
+              backgroundColor: "#0e7490",
+              color: "white",
+              
             }}
+            className="bg-white border border-gray-300 rounded p-2 flex-1"
           >
             <Picker.Item label="Pilih kelas..." value={null} />
             {classrooms.map((classroom) => (

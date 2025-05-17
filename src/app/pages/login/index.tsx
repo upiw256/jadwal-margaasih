@@ -45,7 +45,7 @@ export default function LoginPage() {
   };
 
   return (
-    <View className="flex-1 justify-center bg-gray-100 px-6">
+    <View className="flex-1 justify-center bg-white px-6">
       <Image
         source={require("../../assets/images/icon_square.png")} // sesuaikan path logo
         className="w-32 h-32 mx-auto mb-6"

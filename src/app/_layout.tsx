@@ -10,9 +10,9 @@ function RootLayout() {
   const { authToken } = useAuth();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {authToken && <Header />}
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: "#fff" }}>
         <Slot />
       </View>
       {authToken && <Bottom />}
