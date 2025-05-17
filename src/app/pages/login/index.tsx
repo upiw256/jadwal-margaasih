@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Image,
+  Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { login } from "../../api"; // sesuaikan path
@@ -17,7 +19,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [rememberMe, setRememberMe] = useState(true);
   const router = useRouter();
   const { loginUser } = useAuth();
 
@@ -30,7 +32,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const response = await login(email, password);
-      await loginUser(response.token, response.user);
+      await loginUser(response.token, response.user, rememberMe);
       router.replace("/");
     } catch (error: any) {
       Alert.alert(
@@ -44,6 +46,10 @@ export default function LoginPage() {
 
   return (
     <View className="flex-1 justify-center bg-gray-100 px-6">
+      <Image
+        source={require("../../assets/images/icon_square.png")} // sesuaikan path logo
+        className="w-32 h-32 mx-auto mb-6"
+      />
       <Text className="text-3xl font-bold text-center text-gray-800 mb-8">
         Login
       </Text>
@@ -75,14 +81,22 @@ export default function LoginPage() {
           <Feather
             name={showPassword ? "eye-off" : "eye"}
             size={24}
-            color="#3B82F6" // warna biru sama kayak teks sebelumnya
+            color="#0e7490" // warna biru sama kayak teks sebelumnya
           />
         </TouchableOpacity>
       </View>
-
+      <View className="flex-row items-center mb-6">
+        <Switch
+          value={rememberMe}
+          onValueChange={setRememberMe}
+          trackColor={{ false: "#ccc", true: "#0e7490" }}
+          thumbColor={rememberMe ? "#0284c7" : "#f4f3f4"}
+        />
+        <Text className="ml-2 text-gray-700">Tetap Login</Text>
+      </View>
       <TouchableOpacity
         onPress={handleLogin}
-        className={`py-3 rounded-md ${loading ? "bg-gray-400" : "bg-blue-600"}`}
+        className={`py-3 rounded-md ${loading ? "bg-gray-400" : "bg-cyan-700"}`}
         disabled={loading}
       >
         {loading ? (
@@ -91,6 +105,11 @@ export default function LoginPage() {
           <Text className="text-white text-center font-semibold">Masuk</Text>
         )}
       </TouchableOpacity>
+      <View className="absolute bottom-6 w-full items-center">
+        <Text className="text-xs text-gray-500 text-center">
+          © {new Date().getFullYear()} IT SMAN 1 Margaasih. All rights reserved.
+        </Text>
+      </View>
     </View>
   );
 }

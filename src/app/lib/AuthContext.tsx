@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 interface AuthContextType {
   authToken: string | null;
   user: any | null;
-  loginUser: (token: string, user: any) => Promise<void>;
+  loginUser: (token: string, user: any, rememberMe: boolean) => Promise<void>;
   logout: () => Promise<void>;
   isLoggedIn: boolean;
   isLoading: boolean;
@@ -41,12 +41,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadAuthData();
   }, []);
 
-  const loginUser = async (token: string, user: any) => {
+  const loginUser = async (token: string, user: any, rememberMe: boolean) => {
     setAuthToken(token);
     setUser(user);
     try {
-      await AsyncStorage.setItem("authToken", token);
-      await AsyncStorage.setItem("user", JSON.stringify(user));
+      if (rememberMe) {
+        await AsyncStorage.setItem("authToken", token);
+        await AsyncStorage.setItem("user", JSON.stringify(user));
+      } else {
+        await AsyncStorage.removeItem("authToken");
+        await AsyncStorage.removeItem("user");
+      }
     } catch (error) {
       console.error("Failed to save auth data", error);
     }
