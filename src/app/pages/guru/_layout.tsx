@@ -205,7 +205,7 @@ export default function Page() {
                   </View>
                 )}
               {visibleSchedules[teacher.id] && scheduleNotFound[teacher.id] && (
-                <Text className="mt-4 text-red-500">Jadwal belum ada</Text>
+                <Text className="mt-4 text-red-400">Jadwal belum ada</Text>
               )}
             </View>
           ))}
