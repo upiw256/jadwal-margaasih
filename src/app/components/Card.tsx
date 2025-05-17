@@ -6,7 +6,7 @@ export default function Card({ content }) {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push(`/artikel/${content.id}`);
+    router.push(`/pages/artikel/${content.id}`);
   };
 
   return (

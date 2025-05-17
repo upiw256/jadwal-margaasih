@@ -24,21 +24,21 @@ const Bottom = () => {
         </Link>
         <Link
           className="text-md font-medium hover:underline web:underline-offset-4 text-white"
-          href="pages/kelas"
+          href="/pages/kelas"
         >
           Kelas
         </Link>
         <Link
           className="text-md font-medium hover:underline web:underline-offset-4 text-white"
-          href="pages/guru"
+          href="/pages/guru"
         >
           Guru
         </Link>
         <Link
           className="text-md font-medium hover:underline web:underline-offset-4 text-white"
-          href="pages/about"
+          href="/pages/profile"
         >
-          About
+          Profile
         </Link>
       </View>
     </View>

@@ -1,3 +1,4 @@
+import React from "react"; // Add this line
 import { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import { useWindowDimensions } from "react-native";
@@ -56,10 +57,10 @@ export default function Page() {
         if (data && Array.isArray(data)) {
           setTeachers(data);
         } else {
-          console.error("API response is not valid:", data);
+          console.error("Error: API response for teachers is not valid:", data);
         }
       } catch (error) {
-        console.error("Error fetching teachers:", error);
+        console.error("Error fetching teachers data:", error);
       }
     };
 
@@ -85,18 +86,37 @@ export default function Page() {
 
     if (!visibleSchedules[teacherId]) {
       try {
-        const data = await fetchTeacherSchedule(teacherId);
-        const grouped = groupByDayOfWeek(data as Schedule[]);
-        setSchedules((prevSchedules) => ({
-          ...prevSchedules,
-          [teacherId]: grouped,
-        }));
-        setScheduleNotFound((prevNotFound) => ({
-          ...prevNotFound,
-          [teacherId]: false,
-        }));
+        const response = await fetchTeacherSchedule(teacherId);
+        const data = response; // Extract the `data` key from the response
+        if (Array.isArray(data)) {
+          const grouped = groupByDayOfWeek(data as Schedule[]);
+          setSchedules((prevSchedules) => ({
+            ...prevSchedules,
+            [teacherId]: grouped,
+          }));
+          setScheduleNotFound((prevNotFound) => ({
+            ...prevNotFound,
+            [teacherId]: false,
+          }));
+        } else {
+          console.error(
+            `Error: Expected schedule data for teacher ID ${teacherId} to be an array, but got:`,
+            response
+          );
+          setSchedules((prevSchedules) => ({
+            ...prevSchedules,
+            [teacherId]: {},
+          }));
+          setScheduleNotFound((prevNotFound) => ({
+            ...prevNotFound,
+            [teacherId]: true,
+          }));
+        }
       } catch (error) {
-        console.error("Error fetching schedule:", error);
+        console.error(
+          `Error fetching schedule for teacher ID ${teacherId}:`,
+          error
+        );
         setSchedules((prevSchedules) => ({
           ...prevSchedules,
           [teacherId]: {},
@@ -115,6 +135,9 @@ export default function Page() {
         acc[item.day_of_week] = [];
       }
       acc[item.day_of_week].push(item);
+      acc[item.day_of_week].sort((a, b) =>
+        a.start_time.localeCompare(b.start_time)
+      ); // Sort by start_time
       return acc;
     }, {} as GroupedSchedule);
   };
@@ -136,6 +159,12 @@ export default function Page() {
             disabled={!search.trim()}
           />
         </View>
+        {!searchPressed && teachers.length === 0 && (
+          <Text className="mt-4 text-gray-500">Data guru belum tersedia</Text>
+        )}
+        {searchPressed && filteredTeachers.length === 0 && (
+          <Text className="mt-4 text-gray-500">Guru belum memiliki jadwal</Text>
+        )}
         {searchPressed &&
           filteredTeachers.length > 0 &&
           filteredTeachers.map((teacher) => (
