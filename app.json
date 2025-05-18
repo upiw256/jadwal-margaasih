@@ -5,11 +5,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "scheme": "acme",
     "icon": "./src/app/assets/images/icon_square.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "orientation": "default",
+    "orientation": "potrait",
     "web": {
       "output": "static"
     },

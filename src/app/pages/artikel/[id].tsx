@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+
 import { fetchArticles } from "../../api";
 import { WebView } from "react-native-webview";
 
