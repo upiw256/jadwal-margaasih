@@ -10,11 +10,19 @@
     "icon": "./src/app/assets/images/icon_square.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "orientation": "potrait",
     "web": {
       "output": "static"
     },
-    "plugins": ["expo-router", "expo-asset"],
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "POTRAIT"
+        }
+      ]
+    ],
     "name": "margaasih",
     "slug": "margaasih",
     "extra": {

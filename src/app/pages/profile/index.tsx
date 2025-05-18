@@ -124,7 +124,7 @@ export default function ProfilePage() {
               <TextInput
                 placeholder="Password Lama"
                 secureTextEntry={secureOld}
-                className="bg-gray-100 p-3 rounded-md pr-10"
+                className="bg-gray-600 p-3 rounded-md pr-10"
                 value={oldPassword}
                 onChangeText={setOldPassword}
               />
@@ -144,7 +144,7 @@ export default function ProfilePage() {
               <TextInput
                 placeholder="Password Baru"
                 secureTextEntry={secureNew}
-                className="bg-gray-100 p-3 rounded-md pr-10"
+                className="bg-gray-600 p-3 rounded-md pr-10"
                 value={newPassword}
                 onChangeText={setNewPassword}
               />
@@ -164,7 +164,7 @@ export default function ProfilePage() {
               <TextInput
                 placeholder="Konfirmasi Password Baru"
                 secureTextEntry={secureConfirm}
-                className="bg-gray-100 p-3 rounded-md pr-10"
+                className="bg-gray-600 p-3 rounded-md pr-10"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
               />
