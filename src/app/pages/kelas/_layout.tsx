@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, ScrollView } from "react-native";
+import { View, Text, Button, ScrollView, TouchableOpacity } from "react-native";
 import { useWindowDimensions } from "react-native";
 import { fetchClassrooms, fetchClassroomSchedule } from "../../api";
 import { Picker } from "@react-native-picker/picker"; // Add Picker for combobox
@@ -139,7 +139,10 @@ export default function Page() {
               borderWidth: 1,
               borderColor: "gray",
               borderRadius: 4,
+              backgroundColor: "#0e7490",
+              color: "white",
             }}
+            className="bg-white border border-gray-300 rounded p-2 flex-1"
           >
             <Picker.Item label="Pilih kelas..." value={null} />
             {classrooms.map((classroom) => (
@@ -150,11 +153,21 @@ export default function Page() {
               />
             ))}
           </Picker>
-          <Button
-            title="Search"
+          <TouchableOpacity
             onPress={handleSearch}
             disabled={selectedClassroom === null}
-          />
+            style={{
+              backgroundColor: selectedClassroom === null ? "#ccc" : "#0e7490",
+              paddingVertical: 12,
+              paddingHorizontal: 24,
+              borderRadius: 8,
+              marginLeft: 10,
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>
+              Search
+            </Text>
+          </TouchableOpacity>
         </View>
         {searchPressed &&
           filteredClassrooms.length > 0 &&
@@ -169,10 +182,23 @@ export default function Page() {
               <Text className="text-sm text-gray-500">
                 Walikelas: {classroom.ptk_id_str}
               </Text>
-              <Button
-                title="jadwal"
+              <TouchableOpacity
                 onPress={() => handleShowId(classroom.id)}
-              />
+                style={{
+                  backgroundColor: "#0e7490",
+                  paddingVertical: 10,
+                  paddingHorizontal: 20,
+                  borderRadius: 8,
+                  marginTop: 10,
+                  alignSelf: "flex-start",
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  Lihat Jadwal
+                </Text>
+              </TouchableOpacity>
               {visibleSchedules[classroom.id] &&
                 schedules[classroom.id] &&
                 Object.keys(schedules[classroom.id]).length > 0 && (

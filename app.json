@@ -1,5 +1,10 @@
 {
   "expo": {
+    "splash": {
+      "image": "./src/app/assets/images/icon_square.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "scheme": "acme",
     "icon": "./src/app/assets/images/icon_square.png",
     "userInterfaceStyle": "automatic",
@@ -8,10 +13,7 @@
     "web": {
       "output": "static"
     },
-    "plugins": [
-      "expo-router",
-      "expo-asset"
-    ],
+    "plugins": ["expo-router", "expo-asset"],
     "name": "margaasih",
     "slug": "margaasih",
     "extra": {
