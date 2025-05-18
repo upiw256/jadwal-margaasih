@@ -178,31 +178,40 @@ export const login = async (email: string, password: string) => {
 };
 
 export const updatePassword = async (
+  userId: number,
   oldPassword: string,
   newPassword: string,
   new_password_confirmation: string
 ) => {
   try {
-    const response = await fetch(`${API_URL}/update-password`, {
+    const response = await fetch(`${API_URL}/update-password/${userId}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${AUTH_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        oldPassword,
-        newPassword,
-        new_password_confirmation
+        old_password: oldPassword,
+        new_password: newPassword,
+        new_password_confirmation,
       }),
     });
 
+    const contentType = response.headers.get("content-type");
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Server response:", errorText);
       throw new Error("Update password failed with status " + response.status);
     }
 
-    const data = await response.json();
-
-    return data;
+    if (contentType && contentType.includes("application/json")) {
+      return await response.json();
+    } else {
+      const text = await response.text();
+      console.warn("Expected JSON but got:", text);
+      throw new Error("Unexpected response format");
+    }
   } catch (error) {
     console.error("Update password error:", error);
     throw error;

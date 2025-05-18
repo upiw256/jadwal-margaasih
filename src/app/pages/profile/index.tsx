@@ -11,17 +11,19 @@ import {
 } from "react-native";
 import { useAuth } from "../../lib/AuthContext";
 import { router } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { updatePassword } from "../../api"; // pastikan path sudah benar
+import { MaterialIcons, Feather } from "@expo/vector-icons";
+import { updatePassword } from "../../api";
 
 export default function ProfilePage() {
-  const { user, logout, authToken } = useAuth();
+  const { user, logout } = useAuth();
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  useState("");
+  const [secureOld, setSecureOld] = useState(true);
+  const [secureNew, setSecureNew] = useState(true);
+  const [secureConfirm, setSecureConfirm] = useState(true);
 
   const [loading, setLoading] = useState(false);
 
@@ -33,10 +35,12 @@ export default function ProfilePage() {
     );
   }
 
+  const userId = user.id;
   const guru = user.teacher || {};
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     user.name
   )}&background=0D8ABC&color=fff`;
+
   const handleLogout = async () => {
     await logout();
     router.replace("/pages/login");
@@ -53,12 +57,10 @@ export default function ProfilePage() {
     }
     setLoading(true);
     try {
-      await updatePassword(oldPassword, newPassword, confirmPassword);
-      Alert.alert("Sukses", "Password berhasil diubah");
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setShowPasswordForm(false); // sembunyikan form setelah sukses
+      await updatePassword(userId, oldPassword, newPassword, confirmPassword);
+      Alert.alert("Sukses", "Password berhasil diubah. Silakan login kembali.");
+      await logout();
+      router.replace("/pages/login");
     } catch (error) {
       Alert.alert("Error", error.message || "Gagal mengubah password");
     } finally {
@@ -71,9 +73,7 @@ export default function ProfilePage() {
       <View className="bg-white p-6 rounded-xl m-4 shadow-lg">
         <View className="items-center mb-6">
           <Image
-            source={{
-              uri: avatarUrl,
-            }}
+            source={{ uri: avatarUrl }}
             className="w-24 h-24 rounded-full mb-3"
           />
           <Text className="text-2xl font-bold text-gray-800">{user.name}</Text>
@@ -109,7 +109,6 @@ export default function ProfilePage() {
           </View>
         </View>
 
-        {/* Tombol toggle form ubah password */}
         <TouchableOpacity
           onPress={() => setShowPasswordForm(!showPasswordForm)}
           className="bg-cyan-700 px-6 py-3 rounded-md items-center mt-8"
@@ -119,30 +118,68 @@ export default function ProfilePage() {
           </Text>
         </TouchableOpacity>
 
-        {/* Form Ubah Password */}
         {showPasswordForm && (
           <View className="mt-4">
-            <TextInput
-              placeholder="Password Lama"
-              secureTextEntry
-              className="bg-gray-100 p-3 rounded-md mb-3"
-              value={oldPassword}
-              onChangeText={setOldPassword}
-            />
-            <TextInput
-              placeholder="Password Baru"
-              secureTextEntry
-              className="bg-gray-100 p-3 rounded-md mb-3"
-              value={newPassword}
-              onChangeText={setNewPassword}
-            />
-            <TextInput
-              placeholder="Konfirmasi Password Baru"
-              secureTextEntry
-              className="bg-gray-100 p-3 rounded-md mb-3"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
+            <View className="relative mb-3">
+              <TextInput
+                placeholder="Password Lama"
+                secureTextEntry={secureOld}
+                className="bg-gray-100 p-3 rounded-md pr-10"
+                value={oldPassword}
+                onChangeText={setOldPassword}
+              />
+              <TouchableOpacity
+                className="absolute right-3 top-3"
+                onPress={() => setSecureOld(!secureOld)}
+              >
+                <Feather
+                  name={secureOld ? "eye-off" : "eye"}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View className="relative mb-3">
+              <TextInput
+                placeholder="Password Baru"
+                secureTextEntry={secureNew}
+                className="bg-gray-100 p-3 rounded-md pr-10"
+                value={newPassword}
+                onChangeText={setNewPassword}
+              />
+              <TouchableOpacity
+                className="absolute right-3 top-3"
+                onPress={() => setSecureNew(!secureNew)}
+              >
+                <Feather
+                  name={secureNew ? "eye-off" : "eye"}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View className="relative mb-3">
+              <TextInput
+                placeholder="Konfirmasi Password Baru"
+                secureTextEntry={secureConfirm}
+                className="bg-gray-100 p-3 rounded-md pr-10"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <TouchableOpacity
+                className="absolute right-3 top-3"
+                onPress={() => setSecureConfirm(!secureConfirm)}
+              >
+                <Feather
+                  name={secureConfirm ? "eye-off" : "eye"}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
+
             <TouchableOpacity
               onPress={handleUpdatePassword}
               className="bg-cyan-700 px-6 py-3 rounded-md items-center"
