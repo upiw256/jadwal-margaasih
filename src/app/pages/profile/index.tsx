@@ -1,11 +1,29 @@
-import React from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useAuth } from "../../lib/AuthContext";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { updatePassword } from "../../api"; // pastikan path sudah benar
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, authToken } = useAuth();
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  useState("");
+
+  const [loading, setLoading] = useState(false);
 
   if (!user) {
     return (
@@ -23,6 +41,31 @@ export default function ProfilePage() {
     await logout();
     router.replace("/pages/login");
   };
+
+  const handleUpdatePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      Alert.alert("Error", "Semua field harus diisi");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Error", "Password baru dan konfirmasi tidak cocok");
+      return;
+    }
+    setLoading(true);
+    try {
+      await updatePassword(oldPassword, newPassword, confirmPassword);
+      Alert.alert("Sukses", "Password berhasil diubah");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowPasswordForm(false); // sembunyikan form setelah sukses
+    } catch (error) {
+      Alert.alert("Error", error.message || "Gagal mengubah password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <ScrollView className="flex-1 bg-gray-100">
       <View className="bg-white p-6 rounded-xl m-4 shadow-lg">
@@ -30,7 +73,7 @@ export default function ProfilePage() {
           <Image
             source={{
               uri: avatarUrl,
-            }} // ganti dengan foto profil jika ada
+            }}
             className="w-24 h-24 rounded-full mb-3"
           />
           <Text className="text-2xl font-bold text-gray-800">{user.name}</Text>
@@ -65,10 +108,61 @@ export default function ProfilePage() {
             )}
           </View>
         </View>
+
+        {/* Tombol toggle form ubah password */}
+        <TouchableOpacity
+          onPress={() => setShowPasswordForm(!showPasswordForm)}
+          className="bg-cyan-700 px-6 py-3 rounded-md items-center mt-8"
+        >
+          <Text className="text-white font-semibold">
+            {showPasswordForm ? "Batal Ubah Password" : "Ubah Password"}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Form Ubah Password */}
+        {showPasswordForm && (
+          <View className="mt-4">
+            <TextInput
+              placeholder="Password Lama"
+              secureTextEntry
+              className="bg-gray-100 p-3 rounded-md mb-3"
+              value={oldPassword}
+              onChangeText={setOldPassword}
+            />
+            <TextInput
+              placeholder="Password Baru"
+              secureTextEntry
+              className="bg-gray-100 p-3 rounded-md mb-3"
+              value={newPassword}
+              onChangeText={setNewPassword}
+            />
+            <TextInput
+              placeholder="Konfirmasi Password Baru"
+              secureTextEntry
+              className="bg-gray-100 p-3 rounded-md mb-3"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+            <TouchableOpacity
+              onPress={handleUpdatePassword}
+              className="bg-cyan-700 px-6 py-3 rounded-md items-center"
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white font-semibold">
+                  Simpan Password
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
+
       <TouchableOpacity
         onPress={handleLogout}
-        className="flex-row items-center bg-red-600 px-6 py-3 rounded-md mx-5"
+        className="flex-row items-center bg-red-600 px-6 py-3 rounded-md mx-5 mt-6"
       >
         <MaterialIcons name="logout" size={20} color="#fff" />
         <Text className="text-white font-semibold ml-2">Logout</Text>

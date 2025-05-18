@@ -177,6 +177,38 @@ export const login = async (email: string, password: string) => {
   }
 };
 
+export const updatePassword = async (
+  oldPassword: string,
+  newPassword: string,
+  new_password_confirmation: string
+) => {
+  try {
+    const response = await fetch(`${API_URL}/update-password`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${AUTH_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        oldPassword,
+        newPassword,
+        new_password_confirmation
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Update password failed with status " + response.status);
+    }
+
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error("Update password error:", error);
+    throw error;
+  }
+};
+
 export default {
   login,
   fetchTeachers,
@@ -185,4 +217,5 @@ export default {
   fetchClassroomSchedule,
   fetchArticles,
   fetchStudents,
+  updatePassword,
 };
