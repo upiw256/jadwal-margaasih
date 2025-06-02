@@ -1,9 +1,17 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Alert,
+  BackHandler,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import Hero from "./components/Hero";
 import { fetchArticles } from "./api";
 import { useRouter, Redirect } from "expo-router";
 import { useAuth } from "./lib/AuthContext";
+import NetInfo from "@react-native-community/netinfo";
 const items = [
   {
     name: "Jadwal Kelas",
@@ -39,10 +47,22 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (authToken) {
-      fetchArticles()
-        .then((data) => setCardContents(data))
-        .catch((error) => console.error(error))
-        .finally(() => setLoading(false));
+      // Cek koneksi internet terlebih dahulu
+      NetInfo.fetch().then((state) => {
+        if (!state.isConnected) {
+          Alert.alert(
+            "Tidak Ada Koneksi Internet",
+            "Aplikasi akan keluar.",
+            [{ text: "OK", onPress: () => BackHandler.exitApp() }],
+            { cancelable: false }
+          );
+          return; // Jangan lanjut ke fetchArticles
+        }
+        fetchArticles()
+          .then((data) => setCardContents(data))
+          .catch((error) => console.error(error))
+          .finally(() => setLoading(false));
+      });
     }
   }, [authToken]);
 
